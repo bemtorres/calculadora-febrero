@@ -32,7 +32,11 @@
 <body class="bg-light">
   <div class="container mt-5" id="contenidoPDF">
     <div class="row">
-      <h2 class="text-center mb-4">Cálculo de Remuneración de Febrero <i class="fas fa-question-circle" onclick="startTour()"></i></h2>
+      <h2 class="text-center mb-4">
+        Cálculo de Remuneración de Febrero
+        <i class="fas fa-question-circle" onclick="startTour()" id="examplesquestion"> </i> 
+        <button class="btn btn-outline-secondary btn-sm ms-3" id="examples" data-bs-toggle="modal" data-bs-target="#caseModal">Ejemplos</button>
+      </h2>
       <div class="col-md-12">
         <div class="card shadow-sm p-4 bg-white" data-intro="Ingrese las remuneraciones de los últimos meses para calcular el sueldo de febrero." data-step="1">
           <p>Remuneración por Total Mensual Trabajado</p>
@@ -59,7 +63,7 @@
         </div>
       </div>
       
-      <div class="col-md-8">
+      <div class="col-md-8 mb-3">
         <div class="mt-4">
             <h4 class="text-center">Resumen de Cálculo</h4>
             <div class="card">
@@ -97,16 +101,16 @@
             </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-4 mb-3">
         <div class="mt-4">
           <h4 class="text-center">Total</h4>
-          <div class="card text-start" data-intro="BONO FERIADO COLECTIVO + Remuneración Vacaciones Legales + Remuneración por Total Mensual Trabajado" data-step="7">
+          <div class="card text-start" data-intro="Suma de todos los haberes" data-step="7">
             <div class="card-body">
               <p class="card-text">
                 <strong>Total a haberes:</strong>
               </p>
               <h3 class="text-center" id="febrero">$0.00</h3>
-              <button class="btn btn-outline-secondary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#resumenModal">Descargar</button>
+              <button class="btn btn-outline-secondary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#resumenModal" data-intro="Puedes descargar tu reporte" data-step="8">Descargar</button>
             </div>
           </div>
         </div>
@@ -138,19 +142,24 @@
     </div>
   </div>
 </div>
-
+<div class="modal fade" id="caseModal" tabindex="-1" aria-labelledby="caseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header mb-0 border-0">
+        <!-- <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1> -->
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row" id="modelCards"></div>
+    </div>
+  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
       $(document).ready(function () {
           $('.sueldo').on('input', function () {
               calcularRemuneracion();
           });
-
-          $('#octubre').val(950359);
-          $('#noviembre').val(808423);
-          $('#diciembre').val(837432);
-          $('#enero').val(89893);
-          calcularRemuneracion();
       });
 
       function calcularRemuneracion() {
@@ -210,15 +219,98 @@
     }
 
     function viewImagen() {
+      document.getElementById("examples").hidden = true;
+      document.getElementById("examplesquestion").hidden = true;
       html2canvas(document.getElementById("contenidoPDF"), { scale: 2 }).then(canvas => {
           let imgData = canvas.toDataURL("image/png");
           document.getElementById("imagenGenerada").src = imgData;
       });
+
+      document.getElementById("examples").hidden = false;
+      document.getElementById("examplesquestion").hidden = false;
     }
 
 
     $('#resumenModal').on('shown.bs.modal', function (e) {
       viewImagen();
+    });
+
+    const model = {
+      octubre: 0,
+      noviembre: 0,
+      diciembre: 0,
+      enero: 0,
+    };
+
+    const models = [{
+        name: 'Martín',
+        description: 'Sin TAV en enero obtuvo la jornada mínima garantizada.',
+        img: './face/2.png',
+        octubre: 950359,
+        noviembre: 808423,
+        diciembre: 837432,
+        enero: 89893,
+        tav: false
+      },
+      {
+        name: 'María',
+        description: 'En enero ganó más que el año pasado.',
+        img: './face/1.png',
+        octubre: 950359,
+        noviembre: 808423,
+        diciembre: 837432,
+        enero: 1300000,
+        tav: true
+      }];
+
+
+      function generateModelCards() {
+        const container = document.getElementById("modelCards");
+        container.innerHTML = "";
+        
+        models.forEach((model, index) => {
+            const tav = model.tav ? "" : "text-danger"; 
+            const card = document.createElement("div");
+            card.className = "col-md-6";
+            card.innerHTML = `
+                <div class="card shadow-sm">
+                    <img src="${model.img}" class="card-img-top img-fluid" alt="${model.name}">
+                    <div class="card-body">
+                        <h5 class="card-title">${model.name}</h5>
+                        <p class="card-text">${model.description}</p>
+                        <table class="table tabñe-striped table-bordered table-hover table-sm">
+                            <thead>
+                              <tr>
+                                <th>Mes</th>
+                                <th>Remuneración</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Octubre</td><td class='text-end'>${model.octubre.toLocaleString()}</td></tr>
+                                <tr><td>Noviembre</td><td class='text-end'>${model.noviembre.toLocaleString()}</td></tr>
+                                <tr><td>Diciembre</td><td class='text-end'>${model.diciembre.toLocaleString()}</td></tr>
+                                <tr><td>Enero</td><td class='text-end ${tav}'>${model.enero.toLocaleString()}</td=></tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-secondary btn-sm w-100"  onclick='loadData(${JSON.stringify(model)})'>Simular</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function loadData(model) {
+      $('#octubre').val(model.octubre);
+      $('#noviembre').val(model.noviembre);
+      $('#diciembre').val(model.diciembre);
+      $('#enero').val(model.enero);
+      calcularRemuneracion();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      generateModelCards();
+      loadData(model);
     });
   </script>
 </body>
